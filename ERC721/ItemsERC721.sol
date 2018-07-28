@@ -107,7 +107,11 @@ contract ERC721 is Ownable, SupportsInterfaceWithLookup {
     function balanceOf(address _owner) public view returns (uint) {
       require(_owner != address(0));
       uint balance;
-      (,balance,,) = core.addressInfo(_owner);
+      if(tokenIsChamp){
+        (,balance,,) = core.addressInfo(_owner);
+      }else{
+        (,,balance,) = core.addressInfo(_owner);
+      }
       return balance;
   }
 
