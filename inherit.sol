@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
 import "./ownable.sol";
-import "./interface.sol";
+import "./Interfaces/MyCryptoChampCoreInterface.sol";
 
 contract Inherit is Ownable{
   address internal coreAddress;
