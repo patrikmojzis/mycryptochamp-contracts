@@ -2,8 +2,12 @@ pragma solidity 0.4.24;
 
 import "../safemath.sol";
 import "../inherit.sol";
-import "./strings.sol";
+import "../strings.sol";
 
+//ERC721 Contract 
+interface EC {
+    function emitTransfer(address _from, address _to, uint _tokenId) external; //Controller use only this one function
+}
 
 contract Controller is Inherit, Strings {
 
@@ -39,7 +43,8 @@ contract Controller is Inherit, Strings {
         bool forSale; //is item for sale?
     }
 
-    uint private randNonce = 1;
+    EC champsEC;
+    EC itemsEC;
      
     /// @notice People are allowed to withdraw only if min. balance (0.01 gwei) is reached
     modifier contractMinBalanceReached(){
@@ -84,6 +89,14 @@ contract Controller is Inherit, Strings {
         }
     }
 
+    function setChampEC(address _address) public onlyOwner {
+        champsEC = EC(_address);
+    }
+
+
+    function setItemsEC(address _address) public onlyOwner {
+        itemsEC = EC(_address);
+    }
 
     /// @notice Change champ's name
     function changeChampsName(uint _champId, string _name, address _msgsender) external 
@@ -250,6 +263,8 @@ contract Controller is Inherit, Strings {
 
         core.setTokenToOwner(_champId, _to, true);
 
+        champsEC.emitTransfer(_from,_to,_champId);
+
         //transfer items
         if(champ.eq_sword != 0) { _transferItem(_from, _to, champ.eq_sword); }
         if(champ.eq_shield != 0) { _transferItem(_from, _to, champ.eq_shield); }
@@ -364,9 +379,9 @@ contract Controller is Inherit, Strings {
     function getTokenURIs(uint _id, bool _isTokenChamp) public pure returns(string)
     {
         if(_isTokenChamp){
-            return strConcat('https://mycryptochamp.io/api/1/champ/', uint2str(_id));
+            return strConcat('https://mccapi.patrikmojzis.com/champ.php?id=', uint2str(_id));
         }else{
-            return strConcat('https://mycryptochamp.io/api/1/item/', uint2str(_id));
+            return strConcat('https://mccapi.patrikmojzis.com/item.php?id=', uint2str(_id));
         }
     }
 
@@ -492,6 +507,7 @@ contract Controller is Inherit, Strings {
         
         core.setTokenToOwner(_itemID, _to,false);
 
+        itemsEC.emitTransfer(_from,_to,_itemID);
     }
 
     ///@notice Forge items together
